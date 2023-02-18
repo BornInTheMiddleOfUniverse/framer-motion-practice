@@ -62,6 +62,7 @@ const Circle = styled(motion.div)`
   height: 80px;
   width: 80px;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+  border-radius: 50%;
 `;
 
 const overlay = {
@@ -71,47 +72,77 @@ const overlay = {
 };
 
 const boxVariants = {
-  hover: { scale: 1.2 },
+  hover: (i) => ({
+    scale: 1.2,
+    x: i == 1 || i == 3 ? -30 : 30,
+    y: i == 3 || i == 4 ? 25 : -25,
+  }),
 };
 
 export default function App() {
-  const [id, setId] = useState();
-  const [clicked, setClicked] = useState(false);
-  const toggleClicked = () => setClicked((prev) => !prev);
+  const [index, setIndex] = useState(0);
+  const [selectedBox, setSelectedBox] = useState(null);
+  const toggleClicked = () => {
+    setIndex((prev) => (prev === 1 ? 0 : 1));
+  };
+  const onClickBox = (i) => {
+    setSelectedBox(i);
+  };
+
   return (
     <Wrapper>
       <Grid>
-        {["1", "2", "3", "4"].map((n) => (
-          <Box
-            variants={boxVariants}
-            whileHover="hover"
-            onClick={() => setId(n)}
-            key={n}
-            layoutId={n}
-          >
-            {n == "2" && !clicked ? (
-              <Circle layoutId="circle" style={{ borderRadius: 50 }} />
-            ) : null}
-            {n == "3" && clicked ? (
-              <Circle layoutId="circle" style={{ borderRadius: 50 }} />
-            ) : null}
-          </Box>
-        ))}
+        <Box
+          layoutId="1"
+          onClick={() => onClickBox("1")}
+          variants={boxVariants}
+          whileHover="hover"
+          transision={{ type: "linear", duration: 0.5 }}
+          custom={1}
+        />
+        <Box
+          variants={boxVariants}
+          custom={2}
+          whileHover="hover"
+          transision={{ type: "linear", duration: 0.5 }}
+        >
+          {index === 0 ? <Circle layoutId="circle" /> : null}
+        </Box>
+        <Box
+          variants={boxVariants}
+          whileHover="hover"
+          custom={3}
+          transision={{ type: "linear", duration: 0.5 }}
+        >
+          {" "}
+          {index === 1 ? <Circle layoutId="circle" /> : null}
+        </Box>
+
+        <Box
+          layoutId="0"
+          onClick={() => onClickBox("0")}
+          variants={boxVariants}
+          whileHover="hover"
+          custom={4}
+          transision={{ type: "linear", duration: 0.5 }}
+        />
       </Grid>
+
+      <Button onClick={toggleClicked}>Switch</Button>
+
       <AnimatePresence>
-        {id ? (
+        {selectedBox ? (
           <Overlay
             variants={overlay}
-            onClick={() => setId(null)}
+            onClick={() => onClickBox(null)}
             initial="hidden"
             animate="visible"
-            exit="exit"
+            exit="hidden"
           >
-            <Box layoutId={id} style={{ width: 200, height: 200 }} />
+            <Box layoutId={selectedBox} style={{ width: 350, height: 230 }} />
           </Overlay>
         ) : null}
       </AnimatePresence>
-      <Button onClick={toggleClicked}>Switch</Button>
     </Wrapper>
   );
 }
